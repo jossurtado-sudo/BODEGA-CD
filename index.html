@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario de Galpón</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeede9;
+    --text:#1a1a18;--text2:#6b6b67;--text3:#9c9a92;
+    --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+    --radius:8px;--radius-lg:12px;
+    --blue:#185FA5;--blue-bg:#E6F1FB;--blue-text:#0C447C;
+    --teal:#0F6E56;--teal-bg:#E1F5EE;--teal-text:#085041;
+    --amber:#BA7517;--amber-bg:#FAEEDA;--amber-text:#633806;
+    --coral:#993C1D;--coral-bg:#FAECE7;--coral-text:#4A1B0C;
+    --purple:#534AB7;--purple-bg:#EEEDFE;--purple-text:#3C3489;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;
+      --text:#e8e6dc;--text2:#a8a69e;--text3:#6e6c65;
+      --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+      --blue-bg:#0c3360;--blue-text:#85B7EB;
+      --teal-bg:#053424;--teal-text:#5DCAA5;
+      --amber-bg:#3d2800;--amber-text:#FAC775;
+      --coral-bg:#3d1508;--coral-text:#F0997B;
+      --purple-bg:#2a2560;--purple-text:#AFA9EC;
+    }
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh}
+  header{background:var(--bg);border-bottom:0.5px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:12px;height:56px;position:sticky;top:0;z-index:10}
+  header h1{font-size:16px;font-weight:500}
+  header .subtitle{font-size:13px;color:var(--text2)}
+  .main{max-width:900px;margin:0 auto;padding:1.5rem}
+  .tabs{display:flex;gap:4px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:4px;margin-bottom:1.5rem}
+  .tab{flex:1;padding:8px 12px;font-size:13px;cursor:pointer;border:none;background:transparent;color:var(--text2);border-radius:var(--radius);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+  .tab.active{background:var(--text);color:var(--bg);font-weight:500}
+  .tab i{font-size:16px}
+  .section{display:none}.section.active{display:block}
+  .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:1.5rem}
+  .stat{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem;text-align:center}
+  .stat-n{font-size:26px;font-weight:500}
+  .stat-l{font-size:12px;color:var(--text2);margin-top:4px}
+  .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
+  .card-title{font-size:14px;font-weight:500;margin-bottom:14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .row>div{flex:1;min-width:130px}
+  label{font-size:12px;color:var(--text2);display:block;margin-bottom:4px}
+  input,select,textarea{width:100%;font-size:14px;padding:8px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none;font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+  .btn{padding:8px 18px;border:0.5px solid var(--border2);border-radius:var(--radius);background:transparent;color:var(--text);cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;font-family:inherit;transition:background 0.15s}
+  .btn:hover{background:var(--bg2)}
+  .btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .btn-primary:hover{opacity:0.85;background:var(--text)}
+  .btn-sm{padding:5px 12px;font-size:12px}
+  .btn-danger{color:#E24B4A;border-color:rgba(226,75,74,0.3)}
+  .btn-danger:hover{background:rgba(226,75,74,0.08)}
+  .search-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+  .search-bar input{flex:1;min-width:180px}
+  .search-bar select{min-width:140px}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:8px 10px;border-bottom:0.5px solid var(--border);color:var(--text2);font-weight:500;white-space:nowrap}
+  td{padding:8px 10px;border-bottom:0.5px solid var(--border);color:var(--text)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--bg2)}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500}
+  .b0{background:var(--blue-bg);color:var(--blue-text)}
+  .b1{background:var(--teal-bg);color:var(--teal-text)}
+  .b2{background:var(--amber-bg);color:var(--amber-text)}
+  .b3{background:var(--coral-bg);color:var(--coral-text)}
+  .b4{background:var(--purple-bg);color:var(--purple-text)}
+  .map-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .zona-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;cursor:pointer;transition:all 0.15s}
+  .zona-card:hover{background:var(--bg2)}
+  .zona-card.selected{border-width:2px;border-color:var(--text)}
+  .zona-title{font-weight:500;font-size:14px;margin-bottom:4px}
+  .zona-count{font-size:12px;color:var(--text2);margin-bottom:10px}
+  .bar-track{height:4px;border-radius:2px;background:var(--bg3)}
+  .bar-fill{height:100%;border-radius:2px;transition:width 0.4s}
+  .chip{display:inline-block;font-size:12px;padding:4px 10px;border:0.5px solid var(--border);border-radius:20px;cursor:pointer;color:var(--text2);margin:3px}
+  .chip:hover{background:var(--bg2)}
+  .zona-add-row{display:flex;gap:8px;margin-bottom:10px}
+  .zona-add-row input{flex:1}
+  .empty{text-align:center;padding:2.5rem;color:var(--text3);font-size:14px}
+  .alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:1rem}
+  .alert-info{background:var(--blue-bg);color:var(--blue-text);border:0.5px solid rgba(55,138,221,0.3)}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--radius);font-size:14px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;max-width:280px}
+  .toast.show{opacity:1}
+  code{font-family:monospace;font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px}
+  @media(max-width:600px){
+    .main{padding:1rem}
+    .row>div{min-width:100%}
+    header h1{font-size:14px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <i class="ti ti-building-warehouse" style="font-size:22px;color:var(--text2)"></i>
+  <div>
+    <h1>Inventario de Galpón</h1>
+    <div class="subtitle" id="header-sub">Cargando...</div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('dashboard')"><i class="ti ti-layout-dashboard"></i><span>Panel</span></button>
+    <button class="tab" onclick="showTab('registrar')"><i class="ti ti-plus"></i><span>Registrar</span></button>
+    <button class="tab" onclick="showTab('buscar')"><i class="ti ti-search"></i><span>Buscar</span></button>
+    <button class="tab" onclick="showTab('mapa')"><i class="ti ti-map-2"></i><span>Mapa</span></button>
+  </div>
+
+  <!-- PANEL -->
+  <div id="sec-dashboard" class="section active">
+    <div class="grid-stats" id="stats-cards"></div>
+    <div class="card">
+      <div class="card-title">Últimos materiales registrados</div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Código</th><th>Material</th><th>Zona</th><th>Pasillo</th><th>Estante</th><th>Cantidad</th></tr></thead>
+        <tbody id="recent-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRAR -->
+  <div id="sec-registrar" class="section">
+    <div class="alert alert-info"><i class="ti ti-info-circle"></i> Completa código, nombre y zona para guardar el material.</div>
+    <div class="card">
+      <div class="card-title">Nuevo material</div>
+      <div class="row">
+        <div><label>Código *</label><input id="f-cod" type="text" placeholder="Ej: MAT-001"></div>
+        <div><label>Nombre del material *</label><input id="f-nom" type="text" placeholder="Ej: Tubo galvanizado 2''"></div>
+      </div>
+      <div class="row">
+        <div><label>Zona *</label><select id="f-zona"><option value="">Seleccionar zona...</option></select></div>
+        <div><label>Pasillo</label><input id="f-pasillo" type="text" placeholder="Ej: P-3"></div>
+        <div><label>Estante</label><input id="f-estante" type="text" placeholder="Ej: E-2"></div>
+      </div>
+      <div class="row">
+        <div><label>Cantidad</label><input id="f-cant" type="number" placeholder="0" min="0"></div>
+        <div><label>Unidad</label>
+          <select id="f-unit"><option>unidades</option><option>kg</option><option>metros</option><option>litros</option><option>cajas</option><option>rollos</option><option>piezas</option></select>
+        </div>
+        <div><label>Categoría</label>
+          <select id="f-cat"><option value="">Sin categoría</option><option>Ferretería</option><option>Eléctrico</option><option>Hidráulico</option><option>Herramientas</option><option>Químicos</option><option>Materia prima</option><option>Otro</option></select>
+        </div>
+      </div>
+      <div style="margin-bottom:16px"><label>Observaciones</label><textarea id="f-obs" rows="2" placeholder="Notas adicionales..."></textarea></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="registrar()"><i class="ti ti-device-floppy"></i> Guardar material</button>
+        <button class="btn" onclick="limpiarForm()"><i class="ti ti-eraser"></i> Limpiar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gestionar zonas</div>
+      <div class="zona-add-row">
+        <input id="nueva-zona" placeholder="Nombre de zona (Ej: Zona A, Sector Norte...)">
+        <button class="btn" onclick="agregarZona()"><i class="ti ti-plus"></i> Agregar</button>
+      </div>
+      <div id="zonas-chips"></div>
+    </div>
+  </div>
+
+  <!-- BUSCAR -->
+  <div id="sec-buscar" class="section">
+    <div class="search-bar">
+      <input id="search-input" type="text" placeholder="Buscar por nombre, código, zona o categoría..." oninput="buscar()">
+      <select id="filter-zona" onchange="buscar()"><option value="">Todas las zonas</option></select>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Código</th><th>Material</th><th>Zona</th><th>Pasillo</th><th>Estante</th><th>Cantidad</th><th>Categoría</th><th></th></tr></thead>
+          <tbody id="search-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPA -->
+  <div id="sec-mapa" class="section">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Haz clic en una zona para ver sus materiales.</p>
+    <div class="map-grid" id="map-grid"></div>
+    <div id="map-detail" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let materiales = JSON.parse(localStorage.getItem('galpon_mat')||'[]');
+let zonas = JSON.parse(localStorage.getItem('galpon_zonas')||'["Zona A","Zona B","Zona C","Zona D"]');
+let selectedZona = null;
+const BCLS = ['b0','b1','b2','b3','b4'];
+const FILLS = ['#378ADD','#1D9E75','#EF9F27','#D85A30','#7F77DD'];
+const bc = z => BCLS[zonas.indexOf(z)%BCLS.length]||'b0';
+const fill = z => FILLS[zonas.indexOf(z)%FILLS.length]||FILLS[0];
+
+function save(){
+  localStorage.setItem('galpon_mat',JSON.stringify(materiales));
+  localStorage.setItem('galpon_zonas',JSON.stringify(zonas));
+}
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function updateHeader(){
+  document.getElementById('header-sub').textContent=materiales.length+' materiales · '+zonas.length+' zonas';
+}
+
+function showTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['dashboard','registrar','buscar','mapa'][i]===name);
+  });
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  if(name==='dashboard')renderDashboard();
+  if(name==='buscar'){renderBuscar();populateFilters();}
+  if(name==='mapa')renderMapa();
+  if(name==='registrar')renderZonasChips();
+}
+
+function populateZonaSelect(id,addAll){
+  const el=document.getElementById(id);if(!el)return;
+  const cur=el.value;
+  while(el.options.length>(addAll?1:0))el.remove(addAll?1:0);
+  if(!addAll){while(el.options.length>0)el.remove(0);const o=document.createElement('option');o.value='';o.textContent='Seleccionar zona...';el.appendChild(o);}
+  zonas.forEach(z=>{const o=document.createElement('option');o.value=z;o.textContent=z;el.appendChild(o);});
+  el.value=cur;
+}
+function populateFilters(){
+  const el=document.getElementById('filter-zona');
+  const cur=el.value;
+  while(el.options.length>1)el.remove(1);
+  zonas.forEach(z=>{const o=document.createElement('option');o.value=z;o.textContent=z;el.appendChild(o);});
+  el.value=cur;
+}
+
+function renderDashboard(){
+  updateHeader();
+  const total=materiales.length;
+  const zonasUsadas=new Set(materiales.map(m=>m.zona)).size;
+  const totalCant=materiales.reduce((s,m)=>s+(parseFloat(m.cant)||0),0);
+  const cats=new Set(materiales.map(m=>m.cat).filter(Boolean)).size;
+  document.getElementById('stats-cards').innerHTML=`
+    <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Materiales registrados</div></div>
+    <div class="stat"><div class="stat-n">${zonasUsadas}</div><div class="stat-l">Zonas con material</div></div>
+    <div class="stat"><div class="stat-n">${zonas.length}</div><div class="stat-l">Zonas totales</div></div>
+    <div class="stat"><div class="stat-n">${Math.round(totalCant).toLocaleString('es')}</div><div class="stat-l">Unidades totales</div></div>
+  `;
+  const recientes=materiales.slice(-15).reverse();
+  const tbody=document.getElementById('recent-body');
+  if(!recientes.length){tbody.innerHTML='<tr><td colspan="6" class="empty">Sin materiales aún. Ve a <strong>Registrar</strong> para agregar.</td></tr>';return;}
+  tbody.innerHTML=recientes.map(m=>`
+    <tr>
+      <td><code>${m.cod}</code></td>
+      <td>${m.nom}</td>
+      <td><span class="badge ${bc(m.zona)}">${m.zona}</span></td>
+      <td>${m.pasillo||'—'}</td>
+      <td>${m.estante||'—'}</td>
+      <td>${m.cant||0} ${m.unit||''}</td>
+    </tr>`).join('');
+}
+
+function registrar(){
+  const cod=document.getElementById('f-cod').value.trim();
+  const nom=document.getElementById('f-nom').value.trim();
+  const zona=document.getElementById('f-zona').value;
+  if(!cod){toast('⚠ Ingresa el código del material');return;}
+  if(!nom){toast('⚠ Ingresa el nombre del material');return;}
+  if(!zona){toast('⚠ Selecciona una zona');return;}
+  if(materiales.find(m=>m.cod===cod)){toast('⚠ Ya existe un material con ese código');return;}
+  materiales.push({
+    cod,nom,zona,
+    pasillo:document.getElementById('f-pasillo').value.trim(),
+    estante:document.getElementById('f-estante').value.trim(),
+    cant:document.getElementById('f-cant').value||0,
+    unit:document.getElementById('f-unit').value,
+    cat:document.getElementById('f-cat').value,
+    obs:document.getElementById('f-obs').value.trim(),
+    ts:Date.now()
+  });
+  save();toast('✓ Material guardado correctamente');limpiarForm();updateHeader();
+}
+function limpiarForm(){
+  ['f-cod','f-nom','f-pasillo','f-estante','f-cant','f-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-zona').value='';
+  document.getElementById('f-cat').value='';
+}
+
+function renderZonasChips(){
+  populateZonaSelect('f-zona',false);
+  document.getElementById('zonas-chips').innerHTML=zonas.length?
+    zonas.map(z=>`<span class="chip"><span class="badge ${bc(z)}" style="margin-right:6px">${z}</span><span onclick="eliminarZona('${z}')" style="cursor:pointer;opacity:0.5;font-size:14px" title="Eliminar zona">×</span></span>`).join('')
+    :'<span style="font-size:13px;color:var(--text3)">Sin zonas creadas.</span>';
+}
+function agregarZona(){
+  const v=document.getElementById('nueva-zona').value.trim();
+  if(!v){toast('Escribe el nombre de la zona');return;}
+  if(zonas.includes(v)){toast('Esa zona ya existe');return;}
+  zonas.push(v);save();document.getElementById('nueva-zona').value='';renderZonasChips();toast('✓ Zona "'+v+'" agregada');updateHeader();
+}
+function eliminarZona(z){
+  if(materiales.some(m=>m.zona===z)){toast('No se puede eliminar: hay materiales en esta zona');return;}
+  if(!confirm('¿Eliminar zona "'+z+'"?'))return;
+  zonas=zonas.filter(x=>x!==z);save();renderZonasChips();toast('Zona eliminada');updateHeader();
+}
+
+function buscar(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const fz=document.getElementById('filter-zona').value;
+  const res=materiales.filter(m=>{
+    const match=!q||(m.cod+m.nom+m.zona+(m.cat||'')+(m.pasillo||'')+(m.estante||'')).toLowerCase().includes(q);
+    return match&&(!fz||m.zona===fz);
+  });
+  const tbody=document.getElementById('search-body');
+  if(!res.length){
+    tbody.innerHTML='<tr><td colspan="8" class="empty">'+(materiales.length?'Sin resultados para esa búsqueda.':'No hay materiales registrados aún.')+'</td></tr>';
+    return;
+  }
+  tbody.innerHTML=res.map(m=>`
+    <tr>
+      <td><code>${m.cod}</code></td>
+      <td>${m.nom}${m.obs?'<br><span style="font-size:11px;color:var(--text3)">'+m.obs+'</span>':''}</td>
+      <td><span class="badge ${bc(m.zona)}">${m.zona}</span></td>
+      <td>${m.pasillo||'—'}</td>
+      <td>${m.estante||'—'}</td>
+      <td>${m.cant||0} ${m.unit||''}</td>
+      <td>${m.cat?'<span style="font-size:12px;color:var(--text2)">'+m.cat+'</span>':'—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="eliminarMat('${m.cod}')" title="Eliminar"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('');
+}
+function renderBuscar(){buscar();}
+function eliminarMat(cod){
+  if(!confirm('¿Eliminar el material con código "'+cod+'"?'))return;
+  materiales=materiales.filter(m=>m.cod!==cod);save();buscar();toast('Material eliminado');updateHeader();
+}
+
+function renderMapa(){
+  const grid=document.getElementById('map-grid');
+  const counts=zonas.map(z=>materiales.filter(m=>m.zona===z).length);
+  const maxC=Math.max(...counts,1);
+  grid.innerHTML=zonas.map((z,i)=>{
+    const n=counts[i];
+    const pct=Math.round((n/maxC)*100);
+    return `<div class="zona-card${selectedZona===z?' selected':''}" onclick="selectZona('${z}')">
+      <div class="zona-title">${z}</div>
+      <div class="zona-count"><i class="ti ti-package" style="vertical-align:-2px"></i> ${n} material${n!==1?'es':''}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${fill(z)}"></div></div>
+    </div>`;}).join('');
+  document.getElementById('map-detail').innerHTML='';
+  if(selectedZona)renderMapaDetail();
+}
+function selectZona(z){selectedZona=z===selectedZona?null:z;renderMapa();}
+function renderMapaDetail(){
+  const panel=document.getElementById('map-detail');
+  if(!selectedZona){panel.innerHTML='';return;}
+  const items=materiales.filter(m=>m.zona===selectedZona);
+  panel.innerHTML=`<div class="card">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span class="badge ${bc(selectedZona)}">${selectedZona}</span>
+      <span style="font-size:13px;color:var(--text2)">${items.length} material${items.length!==1?'es':''}</span>
+    </div>
+    ${!items.length
+      ?'<div class="empty">Esta zona no tiene materiales. Ve a <strong>Registrar</strong> para agregar.</div>'
+      :`<div class="table-wrap"><table>
+        <thead><tr><th>Código</th><th>Material</th><th>Pasillo</th><th>Estante</th><th>Cantidad</th><th>Categoría</th></tr></thead>
+        <tbody>${items.map(m=>`<tr>
+          <td><code>${m.cod}</code></td><td>${m.nom}</td>
+          <td>${m.pasillo||'—'}</td><td>${m.estante||'—'}</td>
+          <td>${m.cant||0} ${m.unit||''}</td>
+          <td>${m.cat?'<span style="font-size:12px;color:var(--text2)">'+m.cat+'</span>':'—'}</td>
+        </tr>`).join('')}</tbody></table></div>`}
+  </div>`;
+}
+
+// Init
+populateZonaSelect('f-zona',false);
+renderDashboard();
+</script>
+</body>
+</html>
